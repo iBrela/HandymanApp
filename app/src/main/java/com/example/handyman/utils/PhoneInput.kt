@@ -11,6 +11,35 @@ private const val MIN_NATIONAL_DIGITS = 4
 
 private val COUNTRY_CODE_REGEX = Regex("[1-9]\\d{0,2}")
 
+/** A country offered in the country-code dropdown: ISO 3166 region (e.g. "BD") and dialling code. */
+data class CountryDialCode(val regionCode: String, val dialCode: String)
+
+/** Countries offered in the phone screens' dropdown. Bangladesh comes first as the default. */
+val SUPPORTED_COUNTRIES = listOf(
+    CountryDialCode("BD", BANGLADESH_CODE),
+    CountryDialCode("IN", "91"),
+    CountryDialCode("AU", "61"),
+    CountryDialCode("GB", "44"),
+    CountryDialCode("US", "1"),
+    CountryDialCode("VN", "84"),
+)
+
+/** The supported country with this dialling code, or null if it isn't in the dropdown. */
+fun countryForDialCode(dialCode: String): CountryDialCode? =
+    SUPPORTED_COUNTRIES.firstOrNull { it.dialCode == dialCode }
+
+/**
+ * Display-only: shows ASCII digits as Bangla digits (০-৯) when [language] is Bangla, e.g. "+880" -> "+৮৮০".
+ * Other text is unchanged. Values sent to Firebase must stay ASCII, so use this only for labels.
+ */
+fun localizedDigits(text: String, language: String): String =
+    if (language != LocaleHelper.LANG_BANGLA) text
+    else text.map { if (it in '0'..'9') '০' + (it - '0') else it }.joinToString("")
+
+/** Flag emoji for a two-letter region code, e.g. "BD" -> 🇧🇩 (built from regional indicator symbols). */
+fun flagEmoji(regionCode: String): String =
+    regionCode.uppercase().map { Character.toChars(0x1F1E6 + (it - 'A')).concatToString() }.joinToString("")
+
 /** Why a country code / number pair is not a valid phone number. */
 enum class PhoneError { COUNTRY_CODE, BANGLADESH, GENERIC }
 

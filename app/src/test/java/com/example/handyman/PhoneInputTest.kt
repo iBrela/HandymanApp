@@ -1,7 +1,12 @@
 package com.example.handyman
 
+import com.example.handyman.utils.DEFAULT_COUNTRY_CODE
 import com.example.handyman.utils.PhoneError
+import com.example.handyman.utils.SUPPORTED_COUNTRIES
 import com.example.handyman.utils.buildE164
+import com.example.handyman.utils.countryForDialCode
+import com.example.handyman.utils.flagEmoji
+import com.example.handyman.utils.localizedDigits
 import com.example.handyman.utils.normalizeCountryCode
 import com.example.handyman.utils.normalizeNationalNumber
 import com.example.handyman.utils.normalizeOtpInput
@@ -10,6 +15,44 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class PhoneInputTest {
+
+    // ---- country code dropdown ----
+
+    @Test
+    fun dropdownStartsWithBangladeshAsDefault() {
+        assertThat(SUPPORTED_COUNTRIES.first().dialCode).isEqualTo(DEFAULT_COUNTRY_CODE)
+        assertThat(countryForDialCode(DEFAULT_COUNTRY_CODE)?.regionCode).isEqualTo("BD")
+    }
+
+    @Test
+    fun dropdownCodesAreUniqueAndValid() {
+        val codes = SUPPORTED_COUNTRIES.map { it.dialCode }
+        assertThat(codes).containsNoDuplicates()
+        codes.forEach { assertThat(normalizeCountryCode(it)).isEqualTo(it) }
+    }
+
+    @Test
+    fun unknownDialCodeHasNoCountry() {
+        assertThat(countryForDialCode("999")).isNull()
+    }
+
+    @Test
+    fun flagEmojiIsBuiltFromRegionCode() {
+        assertThat(flagEmoji("BD")).isEqualTo("🇧🇩")
+        assertThat(flagEmoji("au")).isEqualTo("🇦🇺")
+    }
+
+    @Test
+    fun dialCodeShowsBanglaDigitsOnlyInBangla() {
+        assertThat(localizedDigits("+880", "bn")).isEqualTo("+৮৮০")
+        assertThat(localizedDigits("🇻🇳 +84", "bn")).isEqualTo("🇻🇳 +৮৪")
+        assertThat(localizedDigits("+880", "en")).isEqualTo("+880")
+    }
+
+    @Test
+    fun banglaDialCodeConvertsBackToAscii() {
+        assertThat(normalizeCountryCode(localizedDigits("880", "bn"))).isEqualTo("880")
+    }
 
     // ---- country code box ----
 

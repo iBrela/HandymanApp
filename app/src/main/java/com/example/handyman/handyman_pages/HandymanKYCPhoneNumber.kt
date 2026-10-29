@@ -107,7 +107,7 @@ fun HandymanKYCPhoneNumber(modifier: Modifier = Modifier, navController: NavCont
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(stringResource(R.string.mobile_label), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        // Country code (default +880) and number are separate fields; both strip spaces and
+        // Country code dropdown (default +880) next to the number field, which strips spaces and
         // invisible characters, convert Bangla digits to ASCII and enforce the length limit.
         PhoneNumberField(
             countryCode = countryCode,
